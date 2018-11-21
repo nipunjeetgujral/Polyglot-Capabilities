@@ -1,0 +1,82 @@
+---
+title: "R and Python Data Analysis"
+auhtor: "Nipunjeet Gujral"
+data: "last update: `r format(Sys.Date(), fomrat = `%d %B %Y`)`"
+output: 
+  hyml_document:
+      toc: true
+      toc_float: 
+        collapsed: false
+        smooth_scroll: true
+      theme: flatly
+      highlight: haddock
+---
+
+
+
+```{r}
+library(tidytext)
+library(tidytext)
+library(reticulate)
+library(gapminder)
+library(gutenbergr)
+
+
+```
+
+```{r}
+reticulate::use_python(python = 'C:/Program Files (x86)/Python', required = TRUE)
+```
+
+
+comment: using reticulate to trasnform an object using both and then python 
+```{r}
+shakespeare_raw <- gutenberg_download(100) 
+shakespear <- shakespeare_raw %>% 
+  mutate(text = stringr::str_replace_all(text, "[:upper:]{2,}", ""))
+
+for_dictionary <- shakespear %>% 
+  unnest_tokens(word, text)
+
+mos_common_words <- for_dictionary %>% 
+  group_by(word) %>% 
+  summarise(total = n()) %>% 
+  ungroup() %>% 
+  anti_join(stop_words) %>% 
+  arrange(desc(total)) %>% 
+  slice(1:100)
+
+top_word_corpus <- for_dictionary %>% 
+  filter(word %in% unique(mos_common_words)) %>% 
+  pull(word) %>% 
+  as.character ()
+
+python_to_classify <- reticulate::r_to_py(top_word_corpus)   
+py_save_object(python_to_classify, "shakespear.pickle")
+
+```
+
+
+
+```{python engine.path = 'C:/Users/nipun/Anaconda3/python'}
+import numpy as np
+import pickle
+
+raw_corpus_pickle = open("~/shakespear.pickle", "rb")
+raw_corpus = pickle.load(raw_corpus_pickle)
+
+texts = [[word for word in document.lower().split()] for document in raw_corpus]
+
+from collections import defaultdict
+
+processed_corpus = [[token for token in text] for text in texts]
+
+from gensim import corpora
+
+dictionary = corpora.Dictionary(processed_corpus)
+bow_corpus = [dictionary.doc2bow(text) for text in processed_corpus]
+
+from gensim import models
+tfidf = models.TfidfModel(bow_corpus)
+
+```

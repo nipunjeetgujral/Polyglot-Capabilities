@@ -1,0 +1,73 @@
+---
+title: "R and SQL Data Analysis"
+auhtor: "Nipunjeet Gujral"
+data: "last update: `r format(Sys.Date(), fomrat = `%d %B %Y`)`"
+output: 
+  hyml_document:
+      toc: true
+      toc_float: 
+        collapsed: false
+        smooth_scroll: true
+      theme: flatly
+      highlight: haddock
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rlang)
+library(reticulate)
+library(RSQLite)
+library(jsonlite)
+library(DBI)
+```
+
+
+```{r}
+gapminder_sqllite_db <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(conn = gapminder_sqllite_db, "gapminder", gapminder::gapminder)
+```
+
+##SQL
+
+#### Using a SQL Code Chunk
+```{r}
+year <- 1987
+country <- "Rwanda"
+```
+
+
+Comment: The `?` reffers to global variables in memory
+```{sql, connection = gapminder_sqllite_db, output.var = "quried_gapminder_data"}
+SELECT * FROM gapminder WHERE year = ?year AND country = ?country
+```
+
+
+#### Using dplyr
+```{r}
+tbl(gapminder_sqllite_db,  "gapminder") %>% 
+  filter(year == 1987, country == "Rwanda")
+```
+
+
+#### Using DBI and RSQLite to perform the same function
+```{r}
+DBI::dbGetQuery(con = gapminder_sqllite_db, 
+                "SELECT * FROM gapminder WHERE year == 1987 AND country == 'Rwanda'")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
