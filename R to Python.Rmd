@@ -13,23 +13,18 @@ output:
 ---
 
 
-
+### Establishing Libraries
 ```{r}
 library(tidytext)
 library(tidytext)
 library(reticulate)
 library(gapminder)
 library(gutenbergr)
-
-
 ```
 
-```{r}
-reticulate::use_python(python = 'C:/Program Files (x86)/Python', required = TRUE)
-```
+### Using R to source in text(s) by Shakespeare and compose a corpus of the most commonly used words
+### Then us the reticulate package to save the corpus as a .pickle file for python
 
-
-comment: using reticulate to trasnform an object using both and then python 
 ```{r}
 shakespeare_raw <- gutenberg_download(100) 
 shakespear <- shakespeare_raw %>% 
@@ -56,7 +51,9 @@ py_save_object(python_to_classify, "shakespear.pickle")
 
 ```
 
-
+### Establish a python instance inside the Rstudio IDE
+### Import the previously mentioned pickle file
+### Create a topical model from the pcikle file in python
 
 ```{python engine.path = 'C:/Users/nipun/Anaconda3/python'}
 import numpy as np
